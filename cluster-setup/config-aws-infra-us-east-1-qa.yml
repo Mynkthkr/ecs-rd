@@ -1,0 +1,14 @@
+workspace:
+  aws-infra-us-east-1-qa:
+    aws:
+      region: "us-east-1"
+      account_id: 
+    environment_name: "qa"
+    rds:
+      family: "mysql5.7"
+      engine: "db.t3.medium"
+      db_name: "demodb"
+      username: "user"
+      port: "3306"
+      allocated_storage: 20
+
