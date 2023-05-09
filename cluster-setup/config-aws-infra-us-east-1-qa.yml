@@ -1,14 +1,31 @@
 workspace:
   aws-infra-us-east-1-qa:
-    aws:
+    aws:   
       region: "us-east-1"
       account_id: 
+    account_name: aws-infra
     environment_name: "qa"
-    rds:
-      family: "mysql5.7"
-      engine: "db.t3.medium"
-      db_name: "demodb"
-      username: "user"
-      port: "3306"
-      allocated_storage: 20
+
+    ecs_cluster:
+      cluster_name: "ecs-ec2"
+
+    autoscaling_capacity_providers:
+      name: "asgtest"
+
+    ecs_service:
+      name: "demo"
+
+    container_definitions:
+      image: "public.ecr.aws/ecs-sample-image/amazon-ecs-sample:latest"
+      name: "testl"
+      containerPort: 80
+      protocol: "tcp"
+
+    load_balancer:
+      container_name: 
+      container_port: 
+      subnet_ids: ["subnet-0dd96741b19ec4c20", "subnet-0882d12e9929ce102	"]
+
+
+
 

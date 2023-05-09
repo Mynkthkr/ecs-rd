@@ -2,7 +2,7 @@ data "aws_availability_zones" "available" {}
 
 locals {
   region = "us-east-1"
-  name   = "demo"
+  name   = "demotest"
 
   vpc_cidr = "10.0.0.0/16"
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -10,11 +10,11 @@ locals {
   container_name = "ecs-sample"
   container_port = 80
 
-  tags = {
-    Name       = "demo"
-    Example    = "test"
-    Repository = "https://github.com/terraform-aws-modules/terraform-aws-ecs"
-  }
+  # tags = {
+  #   Name       = "teswt"
+  #   Example    = "demowa"
+  #   Repository = "https://github.com/terraform-aws-modules/terraform-aws-ecs"
+  # }
 }
 
 ################################################################################
@@ -24,7 +24,7 @@ locals {
 module "ecs_cluster" {
   source = "terraform-aws-modules/ecs/aws//modules/cluster"
 
-  cluster_name = "ecs-ec2"
+  cluster_name = local.workspace.ecs_cluster.cluster_name
 
   cluster_configuration = {
     execute_command_configuration = {
@@ -37,9 +37,9 @@ module "ecs_cluster" {
 
   autoscaling_capacity_providers = {
     one = {
-      name="asgtest"
-      auto_scaling_group_arn         = "arn:aws:autoscaling:eu-west-1:012345678901:autoScalingGroup:08419a61:autoScalingGroupName/ecs-ec2-one-20220603194933774300000011"
-      managed_termination_protection = "ENABLED"
+      name = local.workspace.autoscaling_capacity_providers.name
+      auto_scaling_group_arn         = "arn:aws:autoscaling:us-east-1:476498784073:autoScalingGroup:a3340e16-23b4-47e7-98cf-7caae7820477:autoScalingGroupName/test"
+      #managed_termination_protection = "ENABLED"
 
       managed_scaling = {
         maximum_scaling_step_size = 2
@@ -53,21 +53,21 @@ module "ecs_cluster" {
         base   = 20
       }
     }
-    two = {
-      auto_scaling_group_arn         = "arn:aws:autoscaling:eu-west-1:012345678901:autoScalingGroup:08419a61:autoScalingGroupName/ecs-ec2-two-20220603194933774300000022"
-      managed_termination_protection = "ENABLED"
+    # two = {
+    #   auto_scaling_group_arn         = "arn:aws:autoscaling:us-east-1:476498784073:autoScalingGroup:a3340e16-23b4-47e7-98cf-7caae7820477:autoScalingGroupName/test"
+    #   managed_termination_protection = "ENABLED"
 
-      managed_scaling = {
-        maximum_scaling_step_size = 15
-        minimum_scaling_step_size = 5
-        status                    = "ENABLED"
-        target_capacity           = 90
-      }
+    #   managed_scaling = {
+    #     maximum_scaling_step_size = 15
+    #     minimum_scaling_step_size = 5
+    #     status                    = "ENABLED"
+    #     target_capacity           = 90
+    #   }
 
-      default_capacity_provider_strategy = {
-        weight = 40
-      }
-    }
+    #   default_capacity_provider_strategy = {
+    #     weight = 40
+    #   }
+    # }
   }
 
   tags = {
@@ -129,7 +129,7 @@ module "ecs_service" {
   source = "terraform-aws-modules/ecs/aws//modules/service"
 
   # Service
-  name        =  local.name
+  name        =  local.workspace.ecs_service.name
   cluster_arn = module.ecs_cluster.arn
 
   # Task Definition
@@ -150,21 +150,21 @@ module "ecs_service" {
   # Container definition(s)
   container_definitions = {
     (local.container_name) = {
-      image = "public.ecr.aws/ecs-sample-image/amazon-ecs-sample:latest"
+      image = local.workspace.container_definitions.image 
       port_mappings = [
         {
-          name          = "demo"
-          containerPort = 80
-          protocol      = "tcp"
+          name          = local.workspace.container_definitions.name
+          containerPort = local.workspace.container_definitions.containerPort
+          protocol      = local.workspace.container_definitions.protocol
         }
       ]
 
-      mount_points = [
-        {
-          sourceVolume  = "my-vol",
-          containerPath = "/var/www/my-vol"
-        }
-      ]
+      # mount_points = [
+      #   {
+      #     sourceVolume  = "my-vol",
+      #     containerPath = "/var/www/my-vol"
+      #   }
+      # ]
 
       entry_point = ["/usr/sbin/apache2", "-D", "FOREGROUND"]
 
@@ -176,12 +176,12 @@ module "ecs_service" {
   load_balancer = {
     service = {
       target_group_arn = element(module.alb.target_group_arns, 0)
-      container_name   = local.container_name
-      container_port   = local.container_port
+      container_name   = local.workspace.load_balancer.container_name
+      container_port   = local.workspace.load_balancer.container_port
     }
   }
 
-  subnet_ids = ["subnet-0107c7a2008e5c86c", "subnet-083eff7405740f87c", "subnet-097b7240437bd0849"]
+  subnet_ids = local.workspace.load_balancer.subnet_ids
   security_group_rules = {
     alb_http_ingress = {
       type                     = "ingress"
@@ -189,7 +189,7 @@ module "ecs_service" {
       to_port                  = 80
       protocol                 = "tcp"
       description              = "Service port"
-      source_security_group_id = "sg-02a3730f5ad90acdb"
+      source_security_group_id = "sg-0065ec72bb70f24bf"
     }
   }
 

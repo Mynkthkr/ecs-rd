@@ -17,15 +17,15 @@
 #   value       = module.ecs_cluster.name
 # }
 
-# output "cluster_capacity_providers" {
-#   description = "Map of cluster capacity providers attributes"
-#   value       = module.ecs_cluster.cluster_capacity_providers
-# }
+output "cluster_capacity_providers" {
+  description = "Map of cluster capacity providers attributes"
+  value       = module.ecs_cluster.cluster_capacity_providers
+}
 
-# output "cluster_autoscaling_capacity_providers" {
-#   description = "Map of capacity providers created and their attributes"
-#   value       = module.ecs_cluster.autoscaling_capacity_providers
-# }
+output "cluster_autoscaling_capacity_providers" {
+  description = "Map of capacity providers created and their attributes"
+  value       = module.ecs_cluster.autoscaling_capacity_providers
+}
 
 # ################################################################################
 # # Service
